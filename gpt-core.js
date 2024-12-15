@@ -12,25 +12,23 @@ var t = `
   </main>
   <div class="pr-[10px]">
     <div class="max-w-3xl mx-auto px-4 xl:px-0">
-      <input autofocus class="w-full bg-gray-100 my-4 p-3 rounded-xl focus:outline-none" 
-       placeholder="Type your message..." v-model="userPrompt" @keyup.enter="sendMessage" />
+      <GPTMsgBox @message-send="sendMessage" />
     </div>
   </div>
 </div>
 `
 
+import GPTMsgBox from './gpt-msgbox.js'
 export default {
+  components: {GPTMsgBox},
   data() {
     return {
-      userPrompt: '',
       messages: [],
     }
   },
   methods: {
-    sendMessage() {
-      if (!this.userPrompt) return;
-      this.messages.push(this.userPrompt);
-      this.userPrompt = '';
+    sendMessage(message) {
+      this.messages.push(message);
       this.scrollMainContainer();
     },
     scrollMainContainer() {
