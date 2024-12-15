@@ -18,7 +18,7 @@ var t = `
 
 import GPTMsgBox from './gpt-msgbox.js'
 import GPTMessages from './gpt-messages.js'
-import { getMockResponse } from './gpt-mockai.js'
+import { mockai } from './gpt-mockai.js'
 export default {
   components: { GPTMsgBox, GPTMessages },
   data() {
@@ -27,9 +27,15 @@ export default {
     }
   },
   methods: {
-    sendMessage(messageText) {
+    async sendMessage(messageText) {
       this.messages.push({role: 'user', content: messageText});
-      this.messages.push({role: 'assistant', content: getMockResponse(this.messages)});
+
+      const client = new mockai({ apiKey: 'apikey' });
+      const response = await client.chat.completions.create({
+        messages: this.messages,
+      });
+
+      this.messages.push({role: "assistant", content: response.choices[0].message.content});
       this.scrollMainContainer();
     },
     scrollMainContainer() {
