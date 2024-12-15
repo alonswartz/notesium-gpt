@@ -5,6 +5,9 @@
     <title>Notesium GPT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3.3.4/dist/vue.global.prod.js"></script>
+    <style>
+      #messageInput[contentEditable=true]:empty:before { content: attr(placeholder); opacity: 0.4; }
+    </style>
   </head>
   <body tabindex="-1">
     <div id="app"></div>

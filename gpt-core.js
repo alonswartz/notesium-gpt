@@ -20,15 +20,15 @@ var t = `
 
 import GPTMsgBox from './gpt-msgbox.js'
 export default {
-  components: {GPTMsgBox},
+  components: { GPTMsgBox },
   data() {
     return {
       messages: [],
     }
   },
   methods: {
-    sendMessage(message) {
-      this.messages.push(message);
+    sendMessage(messageText) {
+      this.messages.push(messageText);
       this.scrollMainContainer();
     },
     scrollMainContainer() {
