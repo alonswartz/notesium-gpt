@@ -1,6 +1,6 @@
 var t = `
 <div class="h-full flex flex-col">
-  <main class="grow overflow-y-scroll">
+  <main class="grow overflow-y-scroll" ref="mainContainer">
     <div class="sticky top-0 z-10 bg-white/50 backdrop-blur border-b border-gray-100 h-12 w-full flex items-center px-4">
       <div>Notesium GPT</div>
     </div>
@@ -31,6 +31,13 @@ export default {
       if (!this.userPrompt) return;
       this.messages.push(this.userPrompt);
       this.userPrompt = '';
+      this.scrollMainContainer();
+    },
+    scrollMainContainer() {
+      this.$nextTick(() => {
+        const container = this.$refs.mainContainer;
+        container.scrollTo({top: container.scrollHeight, behavior: "smooth"});
+      });
     },
   },
   template: t
