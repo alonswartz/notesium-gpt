@@ -5,9 +5,7 @@ var t = `
       <div>Notesium GPT</div>
     </div>
     <div class="max-w-3xl mx-auto px-4 xl:px-0">
-      <template v-for="message in messages">
-        <pre class="h-48 bg-gray-100 p-2 my-4 rounded-md overflow-x-auto" v-text="message"></pre>
-      </template>
+      <GPTMessages :messages=messages />
     </div>
   </main>
   <div class="pr-[10px]">
@@ -19,8 +17,10 @@ var t = `
 `
 
 import GPTMsgBox from './gpt-msgbox.js'
+import GPTMessages from './gpt-messages.js'
+import { getMockResponse } from './gpt-mockai.js'
 export default {
-  components: { GPTMsgBox },
+  components: { GPTMsgBox, GPTMessages },
   data() {
     return {
       messages: [],
@@ -28,7 +28,8 @@ export default {
   },
   methods: {
     sendMessage(messageText) {
-      this.messages.push(messageText);
+      this.messages.push({role: 'user', content: messageText});
+      this.messages.push({role: 'assistant', content: getMockResponse(this.messages)});
       this.scrollMainContainer();
     },
     scrollMainContainer() {
