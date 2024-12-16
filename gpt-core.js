@@ -6,12 +6,12 @@ var t = `
       <div :class="live ? 'text-green-700' : 'text-indigo-700'" v-text="live ? 'openai' : 'mockai'" @click="live=!live; messages=[]" ></div>
     </div>
     <div class="max-w-3xl mx-auto px-4 xl:px-0">
-      <GPTMessages :messages=messages />
+      <GPTMessages :messages=messages :assistantWaiting=assistantWaiting />
     </div>
   </main>
   <div class="pr-[10px]">
     <div class="max-w-3xl mx-auto px-4 xl:px-0">
-      <GPTMsgBox @message-send="sendMessage" />
+      <GPTMsgBox @message-send="sendMessage" :assistantWaiting=assistantWaiting />
     </div>
   </div>
 </div>
@@ -28,11 +28,14 @@ export default {
     return {
       live: false,
       messages: [],
+      assistantWaiting: false,
     }
   },
   methods: {
     async sendMessage(messageText) {
       this.messages.push({role: 'user', content: messageText});
+      this.assistantWaiting = true;
+      this.scrollMainContainer();
 
       const client = this.live
         ? new openai({ apiKey: OPENAI_API_KEY })
@@ -45,6 +48,7 @@ export default {
         messages: this.messages,
       });
 
+      this.assistantWaiting = false;
       this.messages.push({role: "assistant", content: response.choices[0].message.content});
       this.scrollMainContainer();
     },

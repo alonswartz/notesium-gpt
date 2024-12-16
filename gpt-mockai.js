@@ -22,7 +22,7 @@ class MockAI {
 
   async _completionCreate(payload) {
     const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-    await delay(200);
+    await delay(500);
     return getMockResponse(payload.messages);
   }
 }
