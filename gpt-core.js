@@ -6,7 +6,8 @@ var t = `
       <div :class="live ? 'text-green-700' : 'text-indigo-700'" v-text="live ? 'openai' : 'mockai'" @click="live=!live; messages=[]" ></div>
     </div>
     <div class="max-w-3xl mx-auto px-4 xl:px-0">
-      <GPTMessages :messages=messages :assistantWaiting=assistantWaiting />
+      <GPTMessages :messages=messages :assistantWaiting=assistantWaiting
+       :messagesPending=messagesPending @pending-approve="approveMessagesPending" @pending-decline="declineMessagesPending" />
     </div>
   </main>
   <div class="pr-[10px]">
@@ -28,12 +29,24 @@ export default {
     return {
       live: false,
       messages: [],
+      messagesPending: [],
       assistantWaiting: false,
     }
   },
   methods: {
-    async sendMessage(messageText) {
+    declineMessagesPending() {
+      this.messagesPending = [];
+    },
+    approveMessagesPending() {
+      this.messages.push(...this.messagesPending);
+      this.messagesPending = [];
+      this.sendMessages();
+    },
+    sendMessage(messageText) {
       this.messages.push({role: 'user', content: messageText});
+      this.sendMessages();
+    },
+    async sendMessages() {
       this.assistantWaiting = true;
       this.scrollMainContainer();
 
@@ -49,7 +62,21 @@ export default {
       });
 
       this.assistantWaiting = false;
-      this.messages.push({role: "assistant", content: response.choices[0].message.content});
+
+      const finishReason = response.choices[0]?.finish_reason;
+      if (finishReason == "tool_calls") {
+        this.messagesPending.push(response.choices[0].message);
+        for (const toolCall of response.choices[0].message.tool_calls) {
+          const toolName = toolCall.function.name;
+          const toolArgs = JSON.parse(toolCall.function.arguments);
+          //const toolResult = await runTool(toolName, toolArgs);
+          const toolResult = [{'foo': 'bar'}];
+          this.messagesPending.push({role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
+        }
+      } else {
+        this.messages.push({role: "assistant", content: response.choices[0].message.content});
+      }
+
       this.scrollMainContainer();
     },
     scrollMainContainer() {
