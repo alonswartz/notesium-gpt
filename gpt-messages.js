@@ -48,11 +48,19 @@ var t = `
     <div class="w-full flex flex-col items-start gap-2 pt-1.5 overflow-hidden">
       <details class="w-full">
         <summary class="flex flex-none focus:outline-none">
-          <span>The assistant has <span class="border-b border-gray-700 border-dashed cursor-pointer hover:text-gray-700 ">requested context</span> to fulfill the request</span>
+          <span>The assistant has <span class="border-b border-gray-700 border-dashed cursor-pointer hover:text-gray-700">requested context</span> to fulfill the request</span>
         </summary>
-        <div class="bg-gray-100 rounded-md p-2 my-2 w-full">
-          <pre class="text-xs p-2 text-gray-800 max-h-64 overflow-auto" v-text="messagesPending"></pre>
-        </div>
+        <template v-for="message in messagesPending">
+          <template v-if="message.role === 'assistant'">
+            <template v-for="tool in message.tool_calls">
+              <div class="text-xs my-2 p-2 bg-gray-100 border border-gray-200 text-gray-800 max-h-64 overflow-auto font-mono font-bold rounded-md"
+                v-text="'function: ' + JSON.stringify(tool.function)"></div>
+            </template>
+          </template>
+          <template v-if="message.role === 'tool'">
+            <pre class="text-xs p-2 mb-2 bg-gray-100 text-gray-800 max-h-64 overflow-auto rounded-md" v-text="JSON.parse(message.content)"></pre>
+          </template>
+        </template>
       </details>
       <div class="flex space-x-4 items-center text-sm">
         <button @click="$emit('pending-approve')" class="py-1 px-3 rounded-full bg-gray-700 hover:bg-gray-600 text-white">Allow</button>
