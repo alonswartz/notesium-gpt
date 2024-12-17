@@ -23,6 +23,7 @@ import GPTMessages from './gpt-messages.js'
 import { mockai } from './gpt-mockai.js'
 import { openai } from './gpt-openai.js'
 import { OPENAI_API_KEY } from './secrets.js'
+import { systemMsg, toolSpecs, runTool } from './gpt-tools.js'
 export default {
   components: { GPTMsgBox, GPTMessages },
   data() {
@@ -43,6 +44,7 @@ export default {
       this.sendMessages();
     },
     sendMessage(messageText) {
+      if (this.messages.length == 0) this.messages.push({ role: "system", content: systemMsg });
       this.messages.push({role: 'user', content: messageText});
       this.sendMessages();
     },
@@ -59,6 +61,7 @@ export default {
         max_tokens: 100,
         temperature: 0.7,
         messages: this.messages,
+        tools: toolSpecs,
       });
 
       this.assistantWaiting = false;
@@ -69,8 +72,7 @@ export default {
         for (const toolCall of response.choices[0].message.tool_calls) {
           const toolName = toolCall.function.name;
           const toolArgs = JSON.parse(toolCall.function.arguments);
-          //const toolResult = await runTool(toolName, toolArgs);
-          const toolResult = [{'foo': 'bar'}];
+          const toolResult = await runTool(toolName, toolArgs);
           this.messagesPending.push({role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
         }
       } else {
