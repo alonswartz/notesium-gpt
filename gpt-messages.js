@@ -6,13 +6,13 @@ var t = `
       <div class="ml-20 bg-gray-100 rounded-2xl py-3 px-4" v-text="message.content"></div>
     </div>
     <div v-else-if="message.role == 'tool'" class="flex justify-end">
-      <div class="ml-20 bg-gray-100 rounded-2xl pt-2 pb-1.5 pl-3 pr-4 -mb-2">
-        <details class="w-full text-xs">
+      <div class="bg-gray-100 rounded-2xl pt-2 pl-3 -mb-2 overflow-hidden">
+        <details class="w-full max-w-full text-xs">
           <summary class="flex focus:outline-none cursor-pointer hover:underline italic space-x-1">
             <Icon name="mini-paperclip" size="w-3 h-3" />
-            <span>context</span>
+            <span class="pb-1.5 pr-4">context</span>
           </summary>
-          <pre class="mt-2 text-xs max-h-64 overflow-auto" v-text="message.content"></pre>
+          <pre class="mt-2 text-xs max-h-64 overflow-auto" v-text="JSON.parse(message.content)"></pre>
         </details>
       </div>
     </div>
