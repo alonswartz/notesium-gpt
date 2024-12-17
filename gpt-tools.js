@@ -1,4 +1,4 @@
-const systemMsg = "You are a helpful assistant for a notes app. Use the supplied tools to assist the user.";
+const systemMsg = "You are a helpful assistant for a notes app. Use the supplied tools to assist the user. You do not have the ability to update a note via a tool.";
 const toolSpecs = [];
 const toolFuncs = {};
 
@@ -30,6 +30,33 @@ async function list_notes() {
 }
 toolSpecs.push({ type: "function", function: list_notes_spec })
 toolFuncs.list_notes = list_notes;
+
+// fetch note
+const fetch_note_spec = {
+  name: "fetch_note",
+  description: "Fetch a note with its metadata and content. Metadata includes Incoming and Outgoing links.",
+  parameters: {
+    type: "object",
+    properties: {
+      filename: {
+        type: "string",
+        description: "The note filename. Filenames are 8 hexidecimal digits with the .md suffix."
+      },
+    },
+    required: ["filename"],
+    additionalProperties: false,
+  },
+}
+async function fetch_note({ filename = filename } = {}) {
+  return fetch(`/api/notes/${filename}`)
+    .then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)))
+    .then(response => {
+      const { IsLabel, Lines, Words, Chars, Path, ...note } = response;
+      return note;
+    })
+}
+toolSpecs.push({ type: "function", function: fetch_note_spec })
+toolFuncs.fetch_note = fetch_note;
 
 function runTool(name, args) {
   if (typeof toolFuncs[name] === "function") {
