@@ -42,20 +42,18 @@ var t = `
   </div>
 
   <div v-if="messagesPending.length" class="flex w-full items-start gap-4 py-2">
-    <div class="flex items-center justify-center gap-2 rounded-full h-8 w-8 border border-gray-200 text-gray-700">
+    <div class="flex flex-none items-center justify-center gap-2 rounded-full h-8 w-8 border border-gray-200 text-gray-700">
       <Icon name="outline-exclamation-triangle" size="w-4 h-4" />
     </div>
-    <div class="flex grow shrink-0 basis-0 flex-col items-start gap-2">
-      <div class="flex w-full flex-col items-start pt-1.5">
-        <details class="flex-none w-full">
-          <summary class="flex w-full focus:outline-none">
-            <span>The assistant has <span class="border-b border-gray-700 border-dashed cursor-pointer hover:text-gray-700 ">requested context</span> to fulfill the request</span>
-          </summary>
-          <div class="w-full mt-2 mb-1 bg-gray-100 p-2 rounded-md">
-            <pre class="text-xs max-h-64 overflow-auto p-2" v-text="messagesPending"></pre>
-          </div>
-        </details>
-      </div>
+    <div class="w-full flex flex-col items-start gap-2 pt-1.5 overflow-hidden">
+      <details class="w-full">
+        <summary class="flex flex-none focus:outline-none">
+          <span>The assistant has <span class="border-b border-gray-700 border-dashed cursor-pointer hover:text-gray-700 ">requested context</span> to fulfill the request</span>
+        </summary>
+        <div class="bg-gray-100 rounded-md p-2 my-2 w-full">
+          <pre class="text-xs p-2 text-gray-800 max-h-64 overflow-auto" v-text="messagesPending"></pre>
+        </div>
+      </details>
       <div class="flex space-x-4 items-center text-sm">
         <button @click="$emit('pending-approve')" class="py-1 px-3 rounded-full bg-gray-700 hover:bg-gray-600 text-white">Allow</button>
         <button @click="$emit('pending-decline')" class="py-1 px-3 rounded-full bg-gray-100 hover:text-red-700 text-gray-700">Decline</button>
