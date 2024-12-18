@@ -21,8 +21,8 @@ var t = `
         <Icon name="outline-sparkles" size="w-4 h-4" />
       </div>
       <div class="flex grow shrink-0 basis-0 flex-col items-start gap-2">
-        <div class="flex w-full flex-col items-start pt-1.5">
-          <span class="grow shrink-0 basis-0" v-text="message.content"></span>
+        <div class="flex w-full flex-col items-start pt-1">
+          <span class="grow shrink-0 basis-0 prose prose-md prose-h1:text-3xl prose-headings:my-3 max-w-none" v-html="parseMarkdown(message.content)"></span>
         </div>
       </div>
     </div>
@@ -59,5 +59,10 @@ import Icon from './gpt-icon.js'
 export default {
   props: ['messages', 'assistantWaiting', 'warning'],
   components: { Icon },
+  methods: {
+    parseMarkdown(content) {
+      return marked.parse(content);
+    },
+  },
   template: t
 }

@@ -27,6 +27,13 @@ const mockChoice = {
     },
     "finish_reason": "stop"
   },
+  "markdown": {
+    "message": {
+      "role": "assistant",
+      "content": "This is markdown\n\n# heading 1\ncontent\n## heading 2\ncontent\n### heading 3\n1. **Hello**: Hey there\n2. **GoodBye**: Cheers\n"
+    },
+    "finish_reason": "stop"
+  },
   "func_list_notes": {
     "message": {
       "role": "assistant",
