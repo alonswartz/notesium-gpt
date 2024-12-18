@@ -41,12 +41,23 @@ var t = `
     </div>
   </div>
 
+  <div v-show="warning" class="flex w-full items-start gap-4 py-2">
+    <div class="flex items-center justify-center gap-2 rounded-full h-8 w-8 border border-gray-200 text-gray-700">
+      <Icon name="outline-exclamation-triangle" size="w-4 h-4" />
+    </div>
+    <div class="flex grow shrink-0 basis-0 flex-col items-start gap-2">
+      <div class="flex w-full flex-col items-start pt-1.5">
+        <span class="grow shrink-0 basis-0 text-red-700" v-text="warning"></span>
+      </div>
+    </div>
+  </div>
+
 </div>
 `
 
 import Icon from './gpt-icon.js'
 export default {
-  props: ['messages', 'assistantWaiting'],
+  props: ['messages', 'assistantWaiting', 'warning'],
   components: { Icon },
   template: t
 }

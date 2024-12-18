@@ -6,7 +6,7 @@ var t = `
       <div :class="live ? 'text-green-700' : 'text-indigo-700'" v-text="live ? 'openai' : 'mockai'" @click="live=!live; messages=[]" ></div>
     </div>
     <div class="max-w-3xl mx-auto px-4 xl:px-0">
-      <GPTMessages :messages=messages :assistantWaiting=assistantWaiting />
+      <GPTMessages :messages=messages :assistantWaiting=assistantWaiting :warning=warning />
       <GPTPending v-if="pending.length" :pending=pending @pending-approve="approvePending" @pending-decline="declinePending" />
     </div>
   </main>
@@ -33,6 +33,7 @@ export default {
       pending: [],
       messages: [],
       assistantWaiting: false,
+      warning: null,
     }
   },
   methods: {
@@ -50,6 +51,7 @@ export default {
       this.sendMessages();
     },
     async sendMessages() {
+      this.warning = null;
       this.assistantWaiting = true;
       this.scrollMainContainer();
 
@@ -68,14 +70,17 @@ export default {
       this.assistantWaiting = false;
 
       const finishReason = response.choices[0]?.finish_reason;
+      const toolCalls = response.choices[0]?.message?.tool_calls;
       if (finishReason == "tool_calls") {
         this.pending.push(response.choices[0].message);
-        for (const toolCall of response.choices[0].message.tool_calls) {
+        for (const toolCall of toolCalls) {
           const toolName = toolCall.function.name;
           const toolArgs = JSON.parse(toolCall.function.arguments);
           const toolResult = await runTool(toolName, toolArgs);
           this.pending.push({role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
         }
+      } else if (finishReason == "length" && toolCalls) {
+        this.warning = 'The assistant responded with tool_calls, but max_tokens was reached.\n\n' + JSON.stringify(toolCalls);
       } else {
         this.messages.push({role: "assistant", content: response.choices[0].message.content});
       }
