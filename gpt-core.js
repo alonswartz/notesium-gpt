@@ -6,8 +6,8 @@ var t = `
       <div :class="live ? 'text-green-700' : 'text-indigo-700'" v-text="live ? 'openai' : 'mockai'" @click="live=!live; messages=[]" ></div>
     </div>
     <div class="max-w-3xl mx-auto px-4 xl:px-0">
-      <GPTMessages :messages=messages :assistantWaiting=assistantWaiting
-       :messagesPending=messagesPending @pending-approve="approveMessagesPending" @pending-decline="declineMessagesPending" />
+      <GPTMessages :messages=messages :assistantWaiting=assistantWaiting />
+      <GPTPending v-if="pending.length" :pending=pending @pending-approve="approvePending" @pending-decline="declinePending" />
     </div>
   </main>
   <div class="pr-[10px]">
@@ -19,28 +19,29 @@ var t = `
 `
 
 import GPTMsgBox from './gpt-msgbox.js'
+import GPTPending from './gpt-pending.js'
 import GPTMessages from './gpt-messages.js'
 import { mockai } from './gpt-mockai.js'
 import { openai } from './gpt-openai.js'
 import { OPENAI_API_KEY } from './secrets.js'
 import { systemMsg, toolSpecs, runTool } from './gpt-tools.js'
 export default {
-  components: { GPTMsgBox, GPTMessages },
+  components: { GPTMsgBox, GPTPending, GPTMessages },
   data() {
     return {
       live: false,
+      pending: [],
       messages: [],
-      messagesPending: [],
       assistantWaiting: false,
     }
   },
   methods: {
-    declineMessagesPending() {
-      this.messagesPending = [];
+    declinePending() {
+      this.pending = [];
     },
-    approveMessagesPending() {
-      this.messages.push(...this.messagesPending);
-      this.messagesPending = [];
+    approvePending() {
+      this.messages.push(...this.pending);
+      this.pending = [];
       this.sendMessages();
     },
     sendMessage(messageText) {
@@ -68,12 +69,12 @@ export default {
 
       const finishReason = response.choices[0]?.finish_reason;
       if (finishReason == "tool_calls") {
-        this.messagesPending.push(response.choices[0].message);
+        this.pending.push(response.choices[0].message);
         for (const toolCall of response.choices[0].message.tool_calls) {
           const toolName = toolCall.function.name;
           const toolArgs = JSON.parse(toolCall.function.arguments);
           const toolResult = await runTool(toolName, toolArgs);
-          this.messagesPending.push({role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
+          this.pending.push({role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
         }
       } else {
         this.messages.push({role: "assistant", content: response.choices[0].message.content});
