@@ -3,7 +3,7 @@ var t = `
 
   <template v-for="message in messages">
     <div v-if="message.role == 'user'" class="flex justify-end">
-      <div class="ml-20 bg-gray-100 rounded-2xl py-3 px-4" v-text="message.content"></div>
+      <div class="ml-20 bg-gray-100 rounded-2xl py-3 px-4 whitespace-pre-line" v-text="message.content"></div>
     </div>
     <div v-else-if="message.role == 'tool'" class="flex justify-end">
       <div class="bg-gray-100 rounded-2xl pt-2 pl-3 -mb-2 overflow-hidden">
