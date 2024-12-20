@@ -35,9 +35,9 @@ var t = `
   </div>
 </div>
 `
-import Preview from './preview.js'
+//import Preview from './preview.js'
 export default {
-  components: { Preview },
+  //components: { Preview },
   props: ['uri', 'small', 'initialQuery'],
   emits: ['finder-selection'],
   data() {
