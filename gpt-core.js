@@ -83,6 +83,7 @@ export default {
         this.warning = 'The assistant responded with tool_calls, but max_tokens was reached.\n\n' + JSON.stringify(toolCalls);
       } else {
         this.messages.push({role: "assistant", content: response.choices[0].message.content});
+        if (finishReason == "length") this.warning = 'Response truncated, max_tokens reached.';
       }
 
       this.scrollMainContainer();
