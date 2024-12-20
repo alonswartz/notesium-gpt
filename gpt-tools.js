@@ -1,6 +1,16 @@
-const systemMsg = "You are a helpful assistant for a notes app. Use the supplied tools to assist the user. You do not have the ability to update a note via a tool.";
 const toolSpecs = [];
 const toolFuncs = {};
+
+function getSystemMsg() {
+  const currentDatetime = new Date().toLocaleString('en-US', { timeZoneName: 'short' });
+  const systemMsg = `
+    You are a helpful assistant for a notes app.
+    Use the supplied tools to assist the user.
+    You do not have the ability to update a note via a tool.
+    If the user asks about relative dates, know that the current datetime is ${currentDatetime}.
+  `;
+  return { role: "system", content: systemMsg.replace(/^\s+/gm, '').trim() };
+}
 
 // list_notes
 const list_notes_spec = {
@@ -118,4 +128,4 @@ function runTool(name, args) {
   }
 }
 
-export { systemMsg, toolSpecs, runTool };
+export { getSystemMsg, toolSpecs, runTool };

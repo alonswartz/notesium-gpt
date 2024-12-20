@@ -24,7 +24,7 @@ import GPTMessages from './gpt-messages.js'
 import { mockai } from './gpt-mockai.js'
 import { openai } from './gpt-openai.js'
 import { OPENAI_API_KEY } from './secrets.js'
-import { systemMsg, toolSpecs, runTool } from './gpt-tools.js'
+import { getSystemMsg, toolSpecs, runTool } from './gpt-tools.js'
 export default {
   components: { GPTMsgBox, GPTPending, GPTMessages },
   data() {
@@ -46,7 +46,6 @@ export default {
       this.sendMessages();
     },
     sendMessage(messageText) {
-      if (this.messages.length == 0) this.messages.push({ role: "system", content: systemMsg });
       this.messages.push({role: 'user', content: messageText});
       this.sendMessages();
     },
@@ -63,7 +62,7 @@ export default {
         model: "gpt-4o-mini",
         max_tokens: 100,
         temperature: 0.7,
-        messages: this.messages,
+        messages: [getSystemMsg(), ...this.messages],
         tools: toolSpecs,
       });
 
