@@ -76,5 +76,8 @@ export default {
       });
     },
   },
+  watch: {
+    'assistantWaiting': function(newVal) { if (!newVal) this.$refs.messageInput.focus(); },
+  },
   template: t
 }
