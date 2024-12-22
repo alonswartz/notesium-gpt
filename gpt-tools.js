@@ -15,27 +15,61 @@ function getSystemMsg() {
 // list_notes
 const list_notes_spec = {
   name: "list_notes",
-  description: "Get a list of notes",
+  description: "Get a list of notes. Optionally filter by a date range.",
   parameters: {
     type: "object",
-    properties: {},
+    properties: {
+      date_range: {
+        type: "object",
+        description: "Filter notes by a date range. Leave 'start' or 'end' empty for open-ended ranges.",
+        properties: {
+          date: {
+            type: "string",
+            description: "The date field to filter by ('created' or 'modified').",
+            enum: ["created", "modified"],
+          },
+          start: {
+            type: "string",
+            description: "The start date in ISO 8601 format (e.g., '2024-01-01').",
+            format: "date",
+          },
+          end: {
+            type: "string",
+            description: "The end date in ISO 8601 format (e.g., '2024-01-30').",
+            format: "date",
+          },
+        },
+        required: ["date"],
+        additionalProperties: false,
+      },
+    },
     required: [],
     additionalProperties: false,
   },
-}
-async function list_notes() {
+};
+async function list_notes({ date_range = null } = {}) {
   return fetch("/api/notes")
     .then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)))
     .then(response => {
-      const notes = Object.values(response);
-      return notes.map(note => {
-        return {
-          Filename: note.Filename,
-          Title: note.Title,
-          Created: note.Ctime,
-          Modified: note.Mtime,
-        }
-      })
+      let notes = Object.values(response).map(note => ({
+        Filename: note.Filename,
+        Title: note.Title,
+        Created: note.Ctime,
+        Modified: note.Mtime,
+      }));
+
+      if (date_range) {
+        const { date, start, end } = date_range;
+        notes = notes.filter(note => {
+          const field = note[date === 'created' ? 'Created' : 'Modified'];
+          const fieldDate = new Date(field);
+          const afterStart = start ? fieldDate >= new Date(start) : true;
+          const beforeEnd = end ? fieldDate <= new Date(end) : true;
+          return afterStart && beforeEnd;
+        });
+      }
+
+      return notes;
     });
 }
 toolSpecs.push({ type: "function", function: list_notes_spec })
