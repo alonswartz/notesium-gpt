@@ -105,22 +105,52 @@ toolFuncs.fetch_note = fetch_note;
 // search_notes_content
 const search_notes_content_spec = {
   name: "search_notes_content",
-  description: "Perform a full text search on all notes. Use this sparingly, always prefer the list_notes tool (at least as a first step) unless you can infer the user is suggesting a full text search",
+  description:
+    "Perform a full text search on all notes. Use this sparingly; prefer the list_notes tool (at least as a first step) unless the user specifically requests a deeper, keyword-based search across note contents.",
   parameters: {
     type: "object",
     properties: {
       query: {
-        type: "array",
-        items: { type: "string" },
-        description: "Only match lines which include the specified words",
+        type: "string",
+        description: `A single string representing the search query.
+
+Guidelines for constructing the query:
+
+1. **Default to OR (|) for synonyms/semantic expansions**:
+   - If the user’s request suggests multiple related or synonymous terms, or a semantic concept that can be expressed in different ways, use the OR operator.
+   - For instance, if the user says "dog" prefer "dog|puppy|canine".
+
+2. **Use partial matches for stems**:
+   - E.g., 'abilit' to match 'ability'/'abilities'.
+
+3. **Use AND (spaces) only if the user explicitly wants all terms simultaneously**:
+   - If the user says "notes that mention both 'book' and 'physics'," then you can do "book physics".
+
+4. **Use NOT (!) sparingly to exclude terms**:
+   - Only if the user explicitly wants to exclude something. For instance, if the user says "but not math," then do "book !math".
+
+5. **Examples**:
+   - "dog|puppy|canine" => lines matching at least one synonym/semantic variant.
+   - "book physics" => lines must have both "book" AND "physics".
+   - "book !math" => lines must have "book" but not "math".
+
+6. **Analyze the user intent**:
+   - Are they likely looking for synonyms or variations? If yes, incorporate OR for each conceptual group.
+   - Are they explicitly saying “it must have these terms together?” If yes, use AND.
+   - Are they explicitly saying “exclude this term?” If yes, use NOT.
+
+Construct the query string accordingly, focusing on OR-based synonyms for broader, semantic-like searches, and only using AND/NOT if the user specifically indicates that requirement.`,
       },
     },
     required: ["query"],
     additionalProperties: false,
   },
-}
+};
+
+
 async function search_notes_content({ query = query } = {}) {
-  return fetch('/api/raw/lines?prefix=title&color=true')
+  const encodedQuery = encodeURIComponent(query);
+  return fetch('/api/raw/lines?prefix=title&color=true&filter=' + encodedQuery)
     .then(response => response.text())
     .then(text => {
       const PATTERN = /^(.*?):(.*?):\s*(?:\x1b\[0;36m(.*?)\x1b\[0m\s*)?(.*)$/
@@ -130,14 +160,12 @@ async function search_notes_content({ query = query } = {}) {
         const Filename = matches[1];
         const Linenum = parseInt(matches[2], 10);
         const Title = matches[3] || '';
-        const Line = matches[4].toLowerCase();
+        const Line = matches[4];
         return { Filename, Title, Linenum, Line };
       }).filter(Boolean);
 
-      const filteredItems = items.filter(item => (query.every(queryWord => item.Line.includes(queryWord.toLowerCase()))));
-
       const groupedItems = Object.values(
-        filteredItems.reduce((acc, item) => {
+        items.reduce((acc, item) => {
           if (!acc[item.Filename]) { acc[item.Filename] = { Filename: item.Filename, Title: item.Title, Matches: [] }; }
           acc[item.Filename].Matches.push({ Line: item.Linenum, Text: item.Line });
           return acc;
