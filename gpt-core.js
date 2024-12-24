@@ -3,7 +3,13 @@ var t = `
   <main class="grow overflow-y-scroll" ref="mainContainer">
     <div class="sticky top-0 z-10 bg-white/50 backdrop-blur border-b border-gray-100 h-12 w-full flex items-center justify-between px-4">
       <div>Notesium GPT</div>
-      <div :class="live ? 'text-green-700' : 'text-indigo-700'" v-text="live ? 'openai' : 'mockai'" @click="live=!live; messages=[]" ></div>
+      <div class="flex space-x-2 items-center">
+        <span :class="live ? 'text-green-700' : 'text-indigo-700'" v-text="live ? 'openai' : 'mockai'"
+          @click="live=!live; messages=[]; resetTokenCounts()" />
+        <span v-if="live" class="text-xs text-gray-400 pt-1" v-text="'$' + tokenCounts.cost.toFixed(6)"
+          :title="'tokens - prompt:' + tokenCounts.prompt + ' cached:' + tokenCounts.prompt_cached + ' completion:' + tokenCounts.completion" />
+      </div>
+
     </div>
     <div class="max-w-3xl mx-auto px-4 xl:px-0">
       <GPTMessages :messages=messages :assistantWaiting=assistantWaiting :warning=warning @note-open="(...args) => $emit('note-open', ...args)" />
@@ -35,6 +41,7 @@ export default {
       messages: [],
       assistantWaiting: false,
       warning: null,
+      tokenCounts: { prompt: 0, prompt_cached: 0, completion: 0, cost: 0 },
     }
   },
   methods: {
@@ -87,12 +94,30 @@ export default {
       }
 
       this.scrollMainContainer();
+      this.updateTokenCounts(response.usage);
     },
     scrollMainContainer() {
       this.$nextTick(() => {
         const container = this.$refs.mainContainer;
         container.scrollTo({top: container.scrollHeight, behavior: "smooth"});
       });
+    },
+    resetTokenCounts() {
+      this.tokenCounts = { prompt: 0, prompt_cached: 0, completion: 0, cost: 0 }
+    },
+    updateTokenCounts(usage) {
+      if (!usage) return;
+
+      this.tokenCounts.prompt += usage.prompt_tokens || 0;
+      this.tokenCounts.prompt_cached += (usage.prompt_tokens_details?.cached_tokens || 0);
+      this.tokenCounts.completion += usage.completion_tokens || 0;
+
+      // gpt-4o-mini-2024-07-18 - https://openai.com/api/pricing/
+      const costPer1k = { cached: 0.000075, uncached: 0.000150, completion: 0.000600 };
+      const cachedCost = (this.tokenCounts.prompt_cached / 1000) * costPer1k.cached;
+      const uncachedCost = ((this.tokenCounts.prompt - this.tokenCounts.prompt_cached) / 1000) * costPer1k.uncached;
+      const completionCost = (this.tokenCounts.completion / 1000) * costPer1k.completion;
+      this.tokenCounts.cost = cachedCost + uncachedCost + completionCost;
     },
   },
   template: t
