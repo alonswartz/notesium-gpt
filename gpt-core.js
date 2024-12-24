@@ -6,7 +6,7 @@ var t = `
       <div :class="live ? 'text-green-700' : 'text-indigo-700'" v-text="live ? 'openai' : 'mockai'" @click="live=!live; messages=[]" ></div>
     </div>
     <div class="max-w-3xl mx-auto px-4 xl:px-0">
-      <GPTMessages :messages=messages :assistantWaiting=assistantWaiting :warning=warning />
+      <GPTMessages :messages=messages :assistantWaiting=assistantWaiting :warning=warning @note-open="(...args) => $emit('note-open', ...args)" />
       <GPTPending v-if="pending.length" :pending=pending @pending-approve="approvePending" @pending-decline="declinePending" />
     </div>
   </main>
@@ -27,6 +27,7 @@ import { OPENAI_API_KEY } from './secrets.js'
 import { getSystemMsg, toolSpecs, runTool } from './gpt-tools.js'
 export default {
   components: { GPTMsgBox, GPTPending, GPTMessages },
+  emits: ['note-open'],
   data() {
     return {
       live: false,

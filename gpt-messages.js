@@ -22,7 +22,10 @@ var t = `
       </div>
       <div class="flex grow shrink-0 basis-0 flex-col items-start gap-2">
         <div class="flex w-full flex-col items-start pt-1">
-          <span class="grow shrink-0 basis-0 prose prose-md prose-h1:text-3xl prose-headings:my-3 max-w-none" v-html="parseMarkdown(message.content)"></span>
+          <span class="grow shrink-0 basis-0 prose prose-md prose-h1:text-3xl prose-headings:my-3 prose-a:text-blue-600 hover:prose-a:text-blue-500 max-w-none"
+            @click="handleClick"
+            v-html="parseMarkdown(message.content)">
+          </span>
         </div>
       </div>
     </div>
@@ -58,10 +61,22 @@ var t = `
 import Icon from './gpt-icon.js'
 export default {
   props: ['messages', 'assistantWaiting', 'warning'],
+  emits: ['note-open'],
   components: { Icon },
   methods: {
     parseMarkdown(content) {
       return marked.parse(content);
+    },
+    handleClick(event) {
+      const href = event.target?.getAttribute('href');
+      if (href) {
+        if (/^[0-9a-f]{8}\.md$/i.test(href)) {
+          event.preventDefault();
+          this.$emit('note-open', href);
+        } else {
+          event.target.setAttribute('target', '_blank');
+        }
+      }
     },
   },
   template: t

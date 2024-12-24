@@ -30,7 +30,7 @@ const mockChoice = {
   "markdown": {
     "message": {
       "role": "assistant",
-      "content": "This is markdown\n\n# heading 1\ncontent\n## heading 2\ncontent\n### heading 3\n1. **Hello**: Hey there\n2. **GoodBye**: Cheers\n"
+      "content": "This is markdown\n\n# heading 1\ncontent\n## heading 2\ncontent\n### heading 3\n1. **Hello**: Hey there\n1. **GoodBye**: Cheers\n1. These are note links: [foo](64214a1d.md), [bar](64218088.md)\n1. This is a regular link: [google](https://www.google.com)"
     },
     "finish_reason": "stop"
   },

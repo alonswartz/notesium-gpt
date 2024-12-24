@@ -7,6 +7,7 @@ function getSystemMsg() {
     You are a helpful assistant for a notes app.
     Use the supplied tools to assist the user.
     You do not have the ability to update a note via a tool.
+    When referencing a specific note, render it as a markdown link - e.g., [TITLE](FILENAME)
     If the user asks about relative dates, know that the current datetime is ${currentDatetime}.
   `;
   return { role: "system", content: systemMsg.replace(/^\s+/gm, '').trim() };
