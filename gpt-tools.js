@@ -6,6 +6,7 @@ function getSystemMsg() {
   const systemMsg = `
     You are a helpful assistant for a notes app.
     Use the supplied tools to assist the user.
+    The search tools require multi-word terms to be enclosed in single quotes. If you do not enclose multi-word terms in single quotes, the search query will fail and produce no results. This is a hard requirement. Any multi-word terms not enclosed in single quotes are invalid.
     You do not have the ability to update a note via a tool.
     When referencing a specific note, render it as a markdown link - e.g., [TITLE](FILENAME)
     If the user asks about relative dates, know that the current datetime is ${currentDatetime}.
@@ -106,8 +107,7 @@ toolFuncs.fetch_note = fetch_note;
 // search_notes_content
 const search_notes_content_spec = {
   name: "search_notes_content",
-  description:
-    "Perform a full text search on all notes. Use this sparingly; prefer the list_notes tool (at least as a first step) unless the user specifically requests a deeper, keyword-based search across note contents.",
+  description: "Perform a full text search on all notes. Use this when the user specifically requests a keyword-based search across note contents.",
   parameters: {
     type: "object",
     properties: {
@@ -115,39 +115,47 @@ const search_notes_content_spec = {
         type: "string",
         description: `A single string representing the search query.
 
-Guidelines for constructing the query:
+Search Query Construction guidelines:
 
-1. **Default to OR (|) for synonyms/semantic expansions**:
-   - If the user’s request suggests multiple related or synonymous terms, or a semantic concept that can be expressed in different ways, use the OR operator.
-   - For instance, if the user says "dog" prefer "dog|puppy|canine".
+IMPORTANT: **Any multi-word term MUST be enclosed in single quotes**. This applies in ALL scenarios. If a term has more than one word (e.g. "earth science"), you must write it as "'earth science'". Never leave multi-word terms unquoted. Our search logic interprets space-delimited words as AND. If you don't enclose multi-word phrases in single quotes, the entire search query will break, especially when included in an OR. To prevent this, **always** enclose multi-word phrases in single quotes. If you do not enclose multi-word terms in single quotes, the search query will fail and produce no results. This is a hard requirement. Any multi-word terms not enclosed in single quotes are invalid.
 
-2. **Use partial matches for stems**:
-   - E.g., 'abilit' to match 'ability'/'abilities'.
+1. **Analyze the user intent**:
+   - Is the user likely looking for synonyms or variations? If yes, incorporate OR and broaded the search.
+   - Is the user explicitly saying "it must have these terms together?" If yes, use AND.
+   - Is the user explicitly saying "exclude this term?" If yes, use NOT.
+
+2. **Default to OR (|) for synonyms/semantic expansions**:
+   - If the user request suggests related, synonymous terms, or a semantic concept that can be expressed in different ways, use the OR operator.
+   - If the user says "notes relating to science topics", broaden the search using synonymous terms: "science|physics|'earth science'|chemistry|biology|...".
+   - If the user says "notes mentioning albert einstein or richard feynman", broaden the search by using their last names: "einstein|feynman".
+   - If the user says "notes on earth science or astronomy", the user is being specific, so produce "'earth science'|astronomy".
+   - When using multi-word terms, each multi-word term must be enclosed in single quotes. **Never** produce unquoted multi-word terms.
 
 3. **Use AND (spaces) only if the user explicitly wants all terms simultaneously**:
-   - If the user says "notes that mention both 'book' and 'physics'," then you can do "book physics".
+   - If the user says "notes that mention both 'book' and 'physics'", then you can do "book physics".
 
-4. **Use NOT (!) sparingly to exclude terms**:
-   - Only if the user explicitly wants to exclude something. For instance, if the user says "but not math," then do "book !math".
+4. **Use NOT (!) only if the user explicitly wants to exclude terms**:
+   - If the user says "notes that mention 'book' but not 'math'", then you can do "book !math".
 
-5. **Examples**:
-   - "dog|puppy|canine" => lines matching at least one synonym/semantic variant.
-   - "book physics" => lines must have both "book" AND "physics".
-   - "book !math" => lines must have "book" but not "math".
+Examples:
+  - "physics|'space exploration'|math" => lines matching 'physics' OR the exact phrase 'space exploration' or 'math'.
+  - "dog|puppy|canine" => lines matching at least one synonym/semantic variant.
+  - "book physics" => lines matching both "book" AND "physics".
+  - "book !math" => lines matching "book" but NOT "math".
 
-6. **Analyze the user intent**:
-   - Are they likely looking for synonyms or variations? If yes, incorporate OR for each conceptual group.
-   - Are they explicitly saying “it must have these terms together?” If yes, use AND.
-   - Are they explicitly saying “exclude this term?” If yes, use NOT.
+Rules recap:
 
-Construct the query string accordingly, focusing on OR-based synonyms for broader, semantic-like searches, and only using AND/NOT if the user specifically indicates that requirement.`,
+1. **Always** put multi-word terms in single quotes. Failing to quote multi-word terms will break the query. **Never** produce unquoted multi-word terms.
+2. **Default to OR** (|) for broader, semantic-like searches.
+3. **Use AND** (space) only if the user explicitly wants all terms co-occurring.
+4. **Use NOT** (!) only if the user explicity wants to exclude terms.
+`,
       },
     },
     required: ["query"],
     additionalProperties: false,
   },
 };
-
 
 async function search_notes_content({ query = query } = {}) {
   const encodedQuery = encodeURIComponent(query);
