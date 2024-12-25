@@ -6,7 +6,8 @@ function getSystemMsg() {
   const systemMsg = `
     You are a helpful assistant for a notes app.
     Use the supplied tools to assist the user.
-    The search tools require multi-word terms to be enclosed in single quotes. If you do not enclose multi-word terms in single quotes, the search query will fail and produce no results. This is a hard requirement. Any multi-word terms not enclosed in single quotes are invalid.
+    Always prefer to the list_notes tool over search_notes_content unless the user specifically requests a deep keyword-based search across note contents. If there are no results from list_notes, suggest a full-text search.
+    The search_notes_content tool requires multi-word terms to be enclosed in single quotes. If you do not enclose multi-word terms in single quotes, the search query will fail and produce no results. This is a hard requirement. Any multi-word terms not enclosed in single quotes are invalid.
     You do not have the ability to update a note via a tool.
     When referencing a specific note, render it as a markdown link - e.g., [TITLE](FILENAME)
     If the user asks about relative dates, know that the current datetime is ${currentDatetime}.
@@ -17,10 +18,14 @@ function getSystemMsg() {
 // list_notes
 const list_notes_spec = {
   name: "list_notes",
-  description: "Get a list of notes. Optionally filter by a date range.",
+  description: "Get a list of notes. Optionally filter by title and/or date range.",
   parameters: {
     type: "object",
     properties: {
+      title_search: {
+        type: "string",
+        description: "Filter notes whose title include all the words specified in title_search.",
+      },
       date_range: {
         type: "object",
         description: "Filter notes by a date range. Leave 'start' or 'end' empty for open-ended ranges.",
@@ -49,7 +54,7 @@ const list_notes_spec = {
     additionalProperties: false,
   },
 };
-async function list_notes({ date_range = null } = {}) {
+async function list_notes({ title_search = "", date_range = null } = {}) {
   return fetch("/api/notes")
     .then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)))
     .then(response => {
@@ -59,6 +64,14 @@ async function list_notes({ date_range = null } = {}) {
         Created: note.Ctime,
         Modified: note.Mtime,
       }));
+
+      if (title_search.trim().length > 0) {
+        const tokens = title_search.trim().toLowerCase().split(/\s+/);
+        notes = notes.filter(note => {
+          const titleLower = note.Title.toLowerCase();
+          return tokens.every(token => titleLower.includes(token));
+        });
+      }
 
       if (date_range) {
         const { date, start, end } = date_range;
