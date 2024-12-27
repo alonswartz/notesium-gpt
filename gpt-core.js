@@ -14,6 +14,7 @@ var t = `
     <div class="max-w-3xl mx-auto px-4 xl:px-0">
       <GPTMessages :messages=messages :assistantWaiting=assistantWaiting :warning=warning @note-open="(...args) => $emit('note-open', ...args)" />
       <GPTPending v-if="pending.length" :pending=pending @pending-approve="approvePending" @pending-decline="declinePending" />
+      <GPTEmpty v-if="!messages.length" @message-send="sendMessage" />
     </div>
   </main>
   <div class="pr-[10px]">
@@ -24,6 +25,7 @@ var t = `
 </div>
 `
 
+import GPTEmpty from './gpt-empty.js'
 import GPTMsgBox from './gpt-msgbox.js'
 import GPTPending from './gpt-pending.js'
 import GPTMessages from './gpt-messages.js'
@@ -32,7 +34,7 @@ import { openai } from './gpt-openai.js'
 import { OPENAI_API_KEY } from './secrets.js'
 import { getSystemMsg, toolSpecs, runTool } from './gpt-tools.js'
 export default {
-  components: { GPTMsgBox, GPTPending, GPTMessages },
+  components: { GPTEmpty, GPTMsgBox, GPTPending, GPTMessages },
   emits: ['note-open'],
   data() {
     return {
