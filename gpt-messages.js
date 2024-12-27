@@ -12,7 +12,10 @@ var t = `
             <Icon name="mini-paperclip" size="w-3 h-3" />
             <span class="pb-1.5 pr-4">context</span>
           </summary>
-          <pre class="mt-2 text-xs max-h-64 overflow-auto" v-text="JSON.parse(message.content)"></pre>
+          <div class="flex flex-col divide-y">
+            <pre class="py-3 text-xs max-h-32 overflow-auto font-semibold" v-text="getToolCall(message.tool_call_id).function"></pre>
+            <pre class="py-3 text-xs max-h-64 overflow-auto" v-text="JSON.parse(message.content)"></pre>
+          </div>
         </details>
       </div>
     </div>
@@ -77,6 +80,15 @@ export default {
           event.target.setAttribute('target', '_blank');
         }
       }
+    },
+    getToolCall(id) {
+      for (const message of this.messages) {
+        if (message.tool_calls) {
+          const toolCall = message.tool_calls.find(tc => tc.id === id);
+          if (toolCall) return toolCall;
+        }
+      }
+      return null;
     },
   },
   template: t
