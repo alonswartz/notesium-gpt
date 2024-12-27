@@ -12,15 +12,28 @@ var t = `
 `
 
 export default {
+  props: ['live'],
   emits: ['message-send'],
   data() {
     return {
-      examplePrompts: [
+      livePrompts: [
         "What did I work on last week?",
         "Do my notes have a common theme?",
         "Suggest some ways you can assist me",
       ],
+      mockPrompts: [
+        "hello",
+        "lorem",
+        "markdown",
+        "func_list_notes",
+      ],
     }
+  },
+  computed: {
+    examplePrompts() {
+      if (this.live) return this.livePrompts;
+      return this.mockPrompts;
+    },
   },
   template: t
 }

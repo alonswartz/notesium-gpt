@@ -14,7 +14,7 @@ var t = `
     <div class="max-w-3xl mx-auto px-4 xl:px-0">
       <GPTMessages :messages=messages :assistantWaiting=assistantWaiting :warning=warning @note-open="(...args) => $emit('note-open', ...args)" />
       <GPTPending v-if="pending.length" :pending=pending @pending-approve="approvePending" @pending-decline="declinePending" />
-      <GPTEmpty v-if="!messages.length" @message-send="sendMessage" />
+      <GPTEmpty v-if="!messages.length" @message-send="sendMessage" :live=live />
     </div>
   </main>
   <div class="pr-[10px]">
