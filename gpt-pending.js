@@ -16,10 +16,12 @@ var t = `
         </template>
       </div>
       <div class="flex space-x-4 items-center text-sm pl-1">
-        <button ref="approveBtn" @click="$emit('pending-approve')" @keydown.tab.prevent="$refs.declineBtn.focus()"
-          class="py-1 px-3 focus:ring focus:outline-none ring-indigo-400 rounded-full bg-gray-700 hover:bg-gray-600 text-white">Allow</button>
+        <button ref="approveBtn" @click="$emit('pending-approve')" @keydown.tab.prevent="$refs.approveAutoBtn.focus()"
+          class="py-1 px-3 focus:outline-none rounded-full bg-gray-100 text-gray-700 focus:bg-gray-700 focus:text-white">Allow</button>
+        <button ref="approveAutoBtn" @click="$emit('pending-approve', true)" @keydown.tab.prevent="$refs.declineBtn.focus()"
+          class="py-1 px-3 focus:outline-none rounded-full bg-gray-100 text-gray-700 focus:bg-gray-700 focus:text-white">Always Allow</button>
         <button ref="declineBtn" @click="$emit('pending-decline')" @keydown.tab.prevent="$refs.approveBtn.focus()" 
-          class="py-1 px-3 focus:ring focus:outline-none ring-indigo-400 rounded-full bg-gray-100 hover:text-red-700 text-gray-700">Decline</button>
+          class="py-1 px-3 focus:outline-none rounded-full bg-gray-100 text-gray-700 focus:bg-gray-700 focus:text-white">Decline</button>
       </div>
     </div>
   </div>

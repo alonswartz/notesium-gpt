@@ -6,14 +6,14 @@ var t = `
       <div class="flex space-x-2 items-center">
         <span :class="live ? 'text-green-700' : 'text-indigo-700'" v-text="live ? 'openai' : 'mockai'"
           @click="live=!live; messages=[]; resetTokenCounts()" />
+        <span @click="autoApprove=!autoApprove" v-text="autoApprove ? 'auto' : 'manual'" title="context request approval"/>
         <span v-if="live" class="text-xs text-gray-400 pt-1" v-text="'$' + tokenCounts.cost.toFixed(6)"
           :title="'tokens - prompt:' + tokenCounts.prompt + ' cached:' + tokenCounts.prompt_cached + ' completion:' + tokenCounts.completion" />
       </div>
-
     </div>
     <div class="max-w-3xl mx-auto px-4 xl:px-0">
       <GPTMessages :messages=messages :assistantWaiting=assistantWaiting :warning=warning @note-open="(...args) => $emit('note-open', ...args)" />
-      <GPTPending v-if="pending.length" :pending=pending @pending-approve="approvePending" @pending-decline="declinePending" />
+      <GPTPending v-if="pending.length && !autoApprove" :pending=pending @pending-approve="approvePending" @pending-decline="declinePending" />
       <GPTEmpty v-if="!messages.length" @message-send="sendMessage" :live=live />
     </div>
   </main>
@@ -41,6 +41,7 @@ export default {
       live: false,
       pending: [],
       messages: [],
+      autoApprove: false,
       assistantWaiting: false,
       warning: null,
       tokenCounts: { prompt: 0, prompt_cached: 0, completion: 0, cost: 0 },
@@ -50,7 +51,8 @@ export default {
     declinePending() {
       this.pending = [];
     },
-    approvePending() {
+    approvePending(enableAutoApprove) {
+      if (enableAutoApprove) this.autoApprove = true;
       this.messages.push(...this.pending);
       this.pending = [];
       this.sendMessages();
@@ -88,6 +90,7 @@ export default {
           const toolResult = await runTool(toolName, toolArgs);
           this.pending.push({role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
         }
+        if (this.autoApprove) this.approvePending();
       } else if (finishReason == "length" && toolCalls) {
         this.warning = 'The assistant responded with tool_calls, but max_tokens was reached.\n\n' + JSON.stringify(toolCalls);
       } else {
