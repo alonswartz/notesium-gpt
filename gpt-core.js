@@ -90,6 +90,10 @@ export default {
           const toolResult = await runTool(toolName, toolArgs);
           this.pending.push({role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
         }
+        if (this.autoApprove && this.inToolCallsLoop()) {
+          this.autoApprove = false;
+          this.warning = 'Possible loop detected, autoApprove disabled';
+        }
         if (this.autoApprove) this.approvePending();
       } else if (finishReason == "length" && toolCalls) {
         this.warning = 'The assistant responded with tool_calls, but max_tokens was reached.\n\n' + JSON.stringify(toolCalls);
@@ -106,6 +110,19 @@ export default {
         const container = this.$refs.mainContainer;
         container.scrollTo({top: container.scrollHeight, behavior: "smooth"});
       });
+    },
+    inToolCallsLoop() {
+      const loopThreshold = 3;
+      let toolCallCount = 0;
+      for (let i = this.messages.length - 1; i >= 0; i--) {
+        const message = this.messages[i];
+        if (message.role === "user") return false;
+        if (message.role === "assistant" && message.tool_calls) {
+          toolCallCount++;
+          if (toolCallCount >= loopThreshold) return true;
+        }
+      }
+      return false;
     },
     resetTokenCounts() {
       this.tokenCounts = { prompt: 0, prompt_cached: 0, completion: 0, cost: 0 }

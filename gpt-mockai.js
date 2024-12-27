@@ -57,6 +57,7 @@ function getMockResponse(messages) {
   const { role, content = "" } = messages.at(-1) || {};
   if (role === 'tool') {
     return {"choices": [ mockChoice["default_tool"] ] };
+    // return {"choices": [ mockChoice["func_list_notes"] ] }; // mimic tools loop
   } else {
     return {"choices": [ Object.entries(mockChoice).find(([key]) => content.includes(key))?.[1] || mockChoice["default"] ] };
   }
