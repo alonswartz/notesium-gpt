@@ -3,9 +3,12 @@ var t = `
   <main class="grow overflow-y-scroll" ref="mainContainer">
     <div class="sticky top-0 z-10 bg-white/50 backdrop-blur border-b border-gray-100 h-12 w-full flex items-center justify-between px-4">
       <div @click="live=!live; resetState()" v-text="live ? 'Notesium GPT' : 'Notesium GPT (MockAI)'"></div>
-      <div class="flex space-x-2 items-center">
-        <span v-show="settings.showCost.value" class="text-xs text-gray-400 pt-1" v-text="'$' + tokenCounts.cost.toFixed(6)"
+      <div class="flex space-x-4 items-center justify-items-center">
+        <span v-show="settings.showCost.value" class="text-xs text-gray-400" v-text="'$' + tokenCounts.cost.toFixed(6)"
           :title="'tokens - prompt:' + tokenCounts.prompt + ' cached:' + tokenCounts.prompt_cached + ' completion:' + tokenCounts.completion" />
+        <span title="clear" @click="resetState()" class="cursor-pointer text-gray-400 hover:text-gray-600 -mt-px">
+          <Icon name="outline-arrow-path" size="h-4 w-4" />
+        </span>
         <GPTSettings :settings=settings />
       </div>
     </div>
@@ -23,6 +26,7 @@ var t = `
 </div>
 `
 
+import Icon from './gpt-icon.js'
 import GPTEmpty from './gpt-empty.js'
 import GPTMsgBox from './gpt-msgbox.js'
 import GPTPending from './gpt-pending.js'
@@ -33,7 +37,7 @@ import { openai } from './gpt-openai.js'
 import { OPENAI_API_KEY } from './secrets.js'
 import { getSystemMsg, toolSpecs, runTool } from './gpt-tools.js'
 export default {
-  components: { GPTEmpty, GPTMsgBox, GPTPending, GPTMessages, GPTSettings },
+  components: { Icon, GPTEmpty, GPTMsgBox, GPTPending, GPTMessages, GPTSettings },
   emits: ['note-open'],
   data() {
     return {
