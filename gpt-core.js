@@ -2,18 +2,16 @@ var t = `
 <div class="h-full flex flex-col">
   <main class="grow overflow-y-scroll" ref="mainContainer">
     <div class="sticky top-0 z-10 bg-white/50 backdrop-blur border-b border-gray-100 h-12 w-full flex items-center justify-between px-4">
-      <div>Notesium GPT</div>
+      <div @click="live=!live; resetState()" v-text="live ? 'Notesium GPT' : 'Notesium GPT (MockAI)'"></div>
       <div class="flex space-x-2 items-center">
-        <span :class="live ? 'text-green-700' : 'text-indigo-700'" v-text="live ? 'openai' : 'mockai'"
-          @click="live=!live; messages=[]; resetTokenCounts()" />
-        <span @click="autoApprove=!autoApprove" v-text="autoApprove ? 'auto' : 'manual'" title="context request approval"/>
-        <span v-if="live" class="text-xs text-gray-400 pt-1" v-text="'$' + tokenCounts.cost.toFixed(6)"
+        <span v-show="settings.showCost.value" class="text-xs text-gray-400 pt-1" v-text="'$' + tokenCounts.cost.toFixed(6)"
           :title="'tokens - prompt:' + tokenCounts.prompt + ' cached:' + tokenCounts.prompt_cached + ' completion:' + tokenCounts.completion" />
+        <GPTSettings :settings=settings />
       </div>
     </div>
     <div class="max-w-3xl mx-auto px-4 xl:px-0">
       <GPTMessages :messages=messages :assistantWaiting=assistantWaiting :warning=warning @note-open="(...args) => $emit('note-open', ...args)" />
-      <GPTPending v-if="pending.length && !autoApprove" :pending=pending @pending-approve="approvePending" @pending-decline="declinePending" />
+      <GPTPending v-if="pending.length && !settings.autoApprove.value" :pending=pending @pending-approve="approvePending" @pending-decline="declinePending" />
       <GPTEmpty v-if="!messages.length" @message-send="sendMessage" :live=live />
     </div>
   </main>
@@ -29,30 +27,44 @@ import GPTEmpty from './gpt-empty.js'
 import GPTMsgBox from './gpt-msgbox.js'
 import GPTPending from './gpt-pending.js'
 import GPTMessages from './gpt-messages.js'
+import GPTSettings from './gpt-settings.js'
 import { mockai } from './gpt-mockai.js'
 import { openai } from './gpt-openai.js'
 import { OPENAI_API_KEY } from './secrets.js'
 import { getSystemMsg, toolSpecs, runTool } from './gpt-tools.js'
 export default {
-  components: { GPTEmpty, GPTMsgBox, GPTPending, GPTMessages },
+  components: { GPTEmpty, GPTMsgBox, GPTPending, GPTMessages, GPTSettings },
   emits: ['note-open'],
   data() {
     return {
       live: false,
       pending: [],
       messages: [],
-      autoApprove: false,
       assistantWaiting: false,
       warning: null,
       tokenCounts: { prompt: 0, prompt_cached: 0, completion: 0, cost: 0 },
+      settings: {
+        showCost:    { type: 'bool', value: true, title: 'show estimated cost' },
+        autoApprove: { type: 'bool', value: false, title: 'auto approve context requests' },
+        temperature: { type: 'range', value: 0.7, min: 0,   max: 2,     step: 0.1, title: 'temperature'},
+        maxTokens:   { type: 'range', value: 100, min: 100, max: 16000, step: 100, title: 'max output tokens'},
+        model:       { type: 'string', value: 'gpt-4o-mini', title: 'model' },
+      },
     }
   },
   methods: {
+    resetState() {
+      this.pending = [];
+      this.messages = [];
+      this.assistantWaiting = false;
+      this.warning = null;
+      this.tokenCounts = { prompt: 0, prompt_cached: 0, completion: 0, cost: 0 };
+    },
     declinePending() {
       this.pending = [];
     },
     approvePending(enableAutoApprove) {
-      if (enableAutoApprove) this.autoApprove = true;
+      if (enableAutoApprove) this.settings.autoApprove.value = true;
       this.messages.push(...this.pending);
       this.pending = [];
       this.sendMessages();
@@ -71,9 +83,9 @@ export default {
         : new mockai({ apiKey: 'apikey' });
 
       const response = await client.chat.completions.create({
-        model: "gpt-4o-mini",
-        max_tokens: 100,
-        temperature: 0.7,
+        model: this.settings.model.value,
+        max_tokens: parseInt(this.settings.maxTokens.value, 10),
+        temperature: parseFloat(this.settings.temperature.value),
         messages: [getSystemMsg(), ...this.messages],
         tools: toolSpecs,
       });
@@ -90,11 +102,11 @@ export default {
           const toolResult = await runTool(toolName, toolArgs);
           this.pending.push({role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
         }
-        if (this.autoApprove && this.inToolCallsLoop()) {
-          this.autoApprove = false;
+        if (this.settings.autoApprove.value && this.inToolCallsLoop()) {
+          this.settings.autoApprove.value = false;
           this.warning = 'Possible loop detected, autoApprove disabled';
         }
-        if (this.autoApprove) this.approvePending();
+        if (this.settings.autoApprove.value) this.approvePending();
       } else if (finishReason == "length" && toolCalls) {
         this.warning = 'The assistant responded with tool_calls, but max_tokens was reached.\n\n' + JSON.stringify(toolCalls);
       } else {
@@ -123,9 +135,6 @@ export default {
         }
       }
       return false;
-    },
-    resetTokenCounts() {
-      this.tokenCounts = { prompt: 0, prompt_cached: 0, completion: 0, cost: 0 }
     },
     updateTokenCounts(usage) {
       if (!usage) return;
