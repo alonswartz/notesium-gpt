@@ -24,10 +24,15 @@ var t = `
         <Icon name="outline-sparkles" size="w-4 h-4" />
       </div>
       <div class="flex grow shrink-0 basis-0 flex-col items-start gap-2">
-        <div class="flex w-full flex-col items-start pt-1">
+        <div class="group flex w-full flex-col items-start pt-1">
           <span class="grow shrink-0 basis-0 prose prose-md prose-h1:text-3xl prose-headings:my-3 prose-a:text-blue-600 hover:prose-a:text-blue-500 max-w-none"
             @click="handleClick"
             v-html="parseMarkdown(message.content)">
+          </span>
+          <span class="flex space-x-1 items-center cursor-pointer text-transparent group-hover:text-gray-400 hover:underline pt-2 -mb-5 w-full"
+            @click="copyToClipboard(message.content)">
+            <Icon name="square-2-stack" size="w-4 h-4" />
+            <span class="text-xs mt-px" v-text="copyStatus || 'copy to clipboard'" />
           </span>
         </div>
       </div>
@@ -66,6 +71,11 @@ export default {
   props: ['messages', 'assistantWaiting', 'warning'],
   emits: ['note-open'],
   components: { Icon },
+  data() {
+    return {
+      copyStatus: '',
+    }
+  },
   methods: {
     parseMarkdown(content) {
       return marked.parse(content);
@@ -89,6 +99,16 @@ export default {
         }
       }
       return null;
+    },
+    async copyToClipboard(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        this.copyStatus = "copied!";
+      } catch (err) {
+        console.error("Failed to copy text:", err);
+        this.copyStatus = "copy failed";
+      }
+      setTimeout(() => { this.copyStatus = "" }, 2000);
     },
   },
   template: t
