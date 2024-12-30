@@ -1,1 +1,4 @@
 secrets.js
+vendor.js
+tailwind.css
+.vendor/
