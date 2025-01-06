@@ -43,12 +43,31 @@ in the interaction. For those who prefer uninterrupted conversations, an
 
 **Download**:
 
-> Assumes Linux and [tailwindcss standalone-cli](https://tailwindcss.com/blog/standalone-cli).
+Download vendor files and compile CSS (assumes Linux and [tailwindcss standalone-cli](https://tailwindcss.com/blog/standalone-cli)):
 
 ```bash
 git clone https://github.com/alonswartz/notesium-gpt.git
 cd notesium-gpt
-./web/graph/make.sh all
+./make.sh all
+```
+
+Or enable CDN usage:
+
+```bash
+git clone https://github.com/alonswartz/notesium-gpt.git
+cd notesium-gpt
+$EDITOR index.html
+```
+
+```diff
+     <title>Notesium GPT</title>
+-    <!--
+     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+     <script src="https://unpkg.com/vue@3.3.4/dist/vue.global.prod.js"></script>
+     <script src="https://unpkg.com/marked@15.0.3/marked.min.js"></script>
+-    -->
+-    <link href="tailwind.css" rel="stylesheet" />
+-    <script src="vendor.js" type="text/javascript"></script>
 ```
 
 **Api Key**:
