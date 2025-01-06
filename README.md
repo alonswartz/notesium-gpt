@@ -35,29 +35,27 @@ in the interaction. For those who prefer uninterrupted conversations, an
 
 ## Setup
 
-**Prerequisites:**
+1. **Pre-release notesium binary**
 
-- Notesium binary: Either manually build from source (master branch) or
-  download the latest [CI/CD build](https://github.com/alonswartz/notesium/actions/runs/12631671422) (build.zip artifact).
-- An [OpenAI API Key](https://platform.openai.com/account/api-keys).
+Either manually build from source (master branch) or download the latest
+[CI/CD build](https://github.com/alonswartz/notesium/actions/runs/12631671422) (build.zip artifact).
 
-**Download**:
-
-Download vendor files and compile CSS (assumes Linux and [tailwindcss standalone-cli](https://tailwindcss.com/blog/standalone-cli)):
+2. **Clone the repository**
 
 ```bash
 git clone https://github.com/alonswartz/notesium-gpt.git
+```
+
+3. **Vendor and CSS**
+
+Download vendor files and compile CSS (assumes Linux and [tailwindcss standalone-cli](https://tailwindcss.com/blog/standalone-cli)):
+
+```
 cd notesium-gpt
 ./make.sh all
 ```
 
-Or enable CDN usage:
-
-```bash
-git clone https://github.com/alonswartz/notesium-gpt.git
-cd notesium-gpt
-$EDITOR index.html
-```
+Or enable CDN usage (`notesium-gpt/index.html`):
 
 ```diff
      <title>Notesium GPT</title>
@@ -70,10 +68,11 @@ $EDITOR index.html
 -    <script src="vendor.js" type="text/javascript"></script>
 ```
 
-**Api Key**:
+4. **OpenAI API Key**
 
-> Create notesium-gpt/secrets.js with the following contents.
 > See security considerations below.
+
+Generate an [OpenAI API Key](https://platform.openai.com/account/api-keys), and create `notesium-gpt/secrets.js`:
 
 ```javascript
 const OPENAI_API_KEY = 'your-api-key-here';
