@@ -2,6 +2,9 @@
 the OpenAI API, effectively creating a powerful assistant you can talk
 to about your own knowledge base.
 
+![image: request for assistance examples](https://www.notesium.com/images/screenshot-1736172213.png)
+<br/>
+
 This addon is designed with **privacy, transparency, and control** in
 mind. Unlike other AI integrations, it does not use embeddings,
 training, or require a vector database. It also avoids relying on
@@ -19,6 +22,12 @@ the relevant data. These tool_calls and their resulting data are
 displayed for **review and manual approval**, ensuring complete transparency
 in the interaction. For those who prefer uninterrupted conversations, an
 "auto-approve" mode can be enabled.
+
+<video controls muted playsinline preload="metadata">
+  <source src="https://www.notesium.com/images/capture-1736172181.webm" type="video/webm">
+  Your browser does not support the video tag.
+</video>
+<br/>
 
 ## Features
 
