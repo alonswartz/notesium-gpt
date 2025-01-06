@@ -41,7 +41,7 @@ export default {
   emits: ['note-open'],
   data() {
     return {
-      live: false,
+      live: true,
       pending: [],
       messages: [],
       assistantWaiting: false,
@@ -51,7 +51,7 @@ export default {
         showCost:    { type: 'bool', value: true, title: 'show estimated cost' },
         autoApprove: { type: 'bool', value: false, title: 'auto approve context requests' },
         temperature: { type: 'range', value: 0.7, min: 0,   max: 2,     step: 0.1, title: 'temperature'},
-        maxTokens:   { type: 'range', value: 100, min: 100, max: 16000, step: 100, title: 'max output tokens'},
+        maxTokens:   { type: 'range', value: 250, min: 100, max: 16000, step: 100, title: 'max output tokens'},
         model:       { type: 'string', value: 'gpt-4o-mini', title: 'model' },
       },
     }
