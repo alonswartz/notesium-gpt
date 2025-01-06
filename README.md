@@ -37,7 +37,8 @@ in the interaction. For those who prefer uninterrupted conversations, an
 
 **Prerequisites:**
 
-- [Notesium](https://github.com/alonswartz/notesium#installation) 0.6.3 or newer.
+- Notesium binary: Either manually build from source (master branch) or
+  download the latest [CI/CD build](https://github.com/alonswartz/notesium/actions/runs/12631671422) (build.zip artifact).
 - An [OpenAI API Key](https://platform.openai.com/account/api-keys).
 
 **Download**:
