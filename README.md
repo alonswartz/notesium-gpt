@@ -42,10 +42,13 @@ in the interaction. For those who prefer uninterrupted conversations, an
 
 ## Setup
 
-**1. Pre-release notesium binary**
+**1. Install Notesium**
 
-Either manually build from source (master branch) or download the latest
-[CI/CD build](https://github.com/alonswartz/notesium/actions/runs/12786863009) (build.zip artifact).
+Ensure you have [Notesium](https://github.com/alonswartz/notesium#installation) 0.6.3 or later installed.
+
+```bash
+notesium --version
+```
 
 **2. Clone the repository**
 
