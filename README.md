@@ -45,7 +45,7 @@ in the interaction. For those who prefer uninterrupted conversations, an
 **1. Pre-release notesium binary**
 
 Either manually build from source (master branch) or download the latest
-[CI/CD build](https://github.com/alonswartz/notesium/actions/runs/12631671422) (build.zip artifact).
+[CI/CD build](https://github.com/alonswartz/notesium/actions/runs/12786863009) (build.zip artifact).
 
 **2. Clone the repository**
 
@@ -88,6 +88,12 @@ export { OPENAI_API_KEY };
 
 ```bash
 notesium web --webroot="path/to/notesium-gpt" --open-browser
+```
+
+Or mount it under the embedded web/app (`http://localhost:PORT/gpt/`)
+
+```bash
+notesium web --mount="path/to/notesium-gpt:/gpt/" --open-browser
 ```
 
 ## Security considerations
